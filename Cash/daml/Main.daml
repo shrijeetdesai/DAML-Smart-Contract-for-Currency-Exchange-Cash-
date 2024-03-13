@@ -1,0 +1,91 @@
+module Main where
+
+import Daml.Script
+
+template Cash
+  with
+    amount: Decimal
+    currency: Text
+    issuer: Party
+    holder: Party
+    exchange: Party
+    exchangeRate: Decimal
+
+  where
+    signatory issuer,
+    observer exchange
+
+    ensure amount > 0.0
+      -- Add a function Sell that modifies the owner
+    controller issuer can
+
+            Transfer: (ContractId Cash 
+                )
+                with
+                    newHolder: Party
+                do
+                    create this with
+                        holder=newHolder
+
+    controller holder can
+      -- Function to update the exchange rate
+      UpdateExchangeRate: (
+          ContractId Cash
+        )
+        with
+          newExchangeRate: Decimal
+        do
+          create this with
+            exchangeRate = newExchangeRate
+
+    controller exchanger can
+      -- Function to swap currency and update amount with exchange rate
+      Swap: (
+          ContractId Cash
+        ) 
+        with 
+          newcurrency: Text
+          newExchangeRate: Decimal
+        do
+          assert (newExchangeRate > 1.0)
+          create this with
+            currency = newcurrency
+            amount = amount / newExchangeRate
+            exchangeRate = newExchangeRate
+
+
+
+test : Script ()
+test = script do
+-- Add parties that can interact with the contract
+party1 <- allocateParty "the issuer"
+party2 <- allocateParty "the holder" 
+party3 <- allocateParty "the exchanger"
+
+let
+contract <- submit party1 do
+      createCmd Cash with
+        amount = 100.0
+        currency = "USD"
+        issuer = party1
+        holder = party2
+        exchange = party3
+        exchangeRate= 0.0
+
+sellcontract <- submit party1 do
+    exerciseCmd painting1 Transfer with
+      newHolder = party2
+contractAfterUpdate<- submit party2 do
+    exerciseCmd painting1 UpdateExchangeRate with
+      newExchangeRate = 1.2
+currency <- submit party3 do
+    exerciseCmd contractAfterUpdate Swap with
+      newcurrency = "GBP"
+      newExchangeRate = 1.5
+return()
+
+
+ 
+        
+
+ 
