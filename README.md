@@ -1,11 +1,11 @@
-#DAML Smart Contract (Cash Contract)
+# DAML Smart Contract (Cash Contract)
 
-##Description: 
+## Description: 
 The Cash smart contract is built using DAML (Digital Asset Modeling Language) and represents a digital cash asset with functionalities for transferring ownership, updating the exchange rate, and swapping currency values based on an exchange rate. This contract can be utilized in a decentralized finance or trading platform where different parties interact with digital cash assets.
 
-##Structure
-###Template: Cash
-###Fields:
+## Structure
+### Template: Cash
+### Fields:
 
 amount: Decimal - The amount of cash.
 currency: Text - The currency type (e.g., USD, GBP).
